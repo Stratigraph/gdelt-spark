@@ -1,1 +1,56 @@
-/Users/i070855/Downloads/docker-spark/docker-compose.yml
+version: "3"
+services:
+  master:
+    volumes: 
+      - /Users/i070855/Downloads/docker-spark:/data
+    image: singularities/spark
+    command: start-spark master
+    hostname: master
+    ports:
+      - "6066:6066"
+      - "7077:7077"
+      - "7070:7070"
+      - "8080:8080"
+      - "50070:50070"
+  worker:
+    volumes:
+      - /Users/i070855/Downloads/docker-spark:/data
+    image: singularities/spark
+    command: start-spark worker master
+    hostname: worker_1
+    environment:
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 2g
+    links:
+      - master
+  notebook:
+    volumes:
+      - /Users/i070855/Downloads/docker-spark:/data
+    image: andypetrella/spark-notebook:0.7.0-scala-2.11.8-spark-2.1.1-hadoop-2.7.2-with-hive
+    hostname: notebook
+    depends_on:
+      - master
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+      - "4040:4040"
+      - "4041:4041"
+      - "4042:4042"
+      - "4043:4043"
+      - "4044:4044"
+      - "4045:4045"
+    links:
+      - master
+      - worker
+  d3:
+    volumes:
+      - /Users/i070855/Downloads/docker-spark:/data
+      - /Users/i070855/Downloads/docker-spark/graphs:/revealjs/talks
+    image: gamsd/revealjs
+    hostname: d3
+    links:
+      - master
+      - worker
+      - notebook
+    ports:
+      - "8000:8000"
