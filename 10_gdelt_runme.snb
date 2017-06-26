@@ -1,0 +1,173 @@
+{
+  "metadata" : {
+    "name" : "10_gdelt_runme",
+    "user_save_timestamp" : "1970-01-01T00:00:00.000Z",
+    "auto_save_timestamp" : "1970-01-01T00:00:00.000Z",
+    "language_info" : {
+      "name" : "scala",
+      "file_extension" : "scala",
+      "codemirror_mode" : "text/x-scala"
+    },
+    "trusted" : true,
+    "customLocalRepo" : null,
+    "customRepos" : null,
+    "customDeps" : null,
+    "customImports" : null,
+    "customArgs" : null,
+    "customSparkConf" : {
+      "spark.app.name" : "Notebook",
+      "spark.master" : "spark://master:7077",
+      "spark.executor.memory" : "2G"
+    }
+  },
+  "cells" : [ {
+    "metadata" : {
+      "id" : "57732E3A69544B3DB5B12538953A6146"
+    },
+    "cell_type" : "markdown",
+    "source" : "Spark Standalone cluster (Master/Worker_1) dashboard: http://localhost:4040/jobs/\n\n\n"
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false,
+      "id" : "0C2DE519BC4F4A33ABC432B867DDEBFC"
+    },
+    "cell_type" : "code",
+    "source" : "import org.apache.spark.sql.SparkSession\n\nval spark = SparkSession\n  .builder()\n  .appName(\"Spark SQL basic example\")\n  .config(\"spark.some.config.option\", \"some-value\")\n  .getOrCreate()\n\n// For implicit conversions like converting RDDs to DataFrames\nimport spark.implicits._\nimport org.apache.spark.sql.types._\nval peopleRDD = spark.sparkContext.textFile(\"/etc/hosts\").toDF.show(10,false)\n// Success: if the last line is \"172.18.0.X  worker_1\". A spark-context has been started run the standalone spark cluster master + worker_1\n\n\n\n\n",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "import org.apache.spark.sql.SparkSession\nspark: org.apache.spark.sql.SparkSession = org.apache.spark.sql.SparkSession@59dfe852\nimport spark.implicits._\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 1,
+      "time" : "Took: 2 seconds 712 milliseconds, at 2017-6-25 6:35"
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : true,
+      "id" : "0D863F76654B4FFAB6B211757881FDEB"
+    },
+    "cell_type" : "code",
+    "source" : "import java.io.{File, FileWriter, BufferedWriter}\nimport java.util.zip.{ZipEntry, ZipOutputStream}\n\n\nIO.unzipURL(new URL(\"http://data.gdeltproject.org/events/20170520.export.CSV.zip\"), new File(\"/tmp\"))\n\n\n\n//val writer = new BufferedWriter(new FileWriter(new File(\"/tmp/closes.csv\")))\n//var zip=scala.io.Source.fromURL(\"http://data.gdeltproject.org/events/20170520.export.CSV.zip\")  //.getLines().foreach(s => writer.write(s+\"\\n\"))\n//zip.write(source.map(_.toByte).toArray)\n//source.close()\n//zip.closeEntry()\n//writer.close()",
+    "outputs" : [ ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : true,
+      "id" : "8DB3E7037FA84D76B110F7D5AB5195AE"
+    },
+    "cell_type" : "code",
+    "source" : " /**\n   * downloads a url (file) to a desired file name\n   */\n  def downloadFile(url: URL, filename: String) {\n    commonOp(url2InputStream(url), filename)\n  }\n\n  /**\n   * common method for writing data from an inputstream to an outputstream\n   */\n  def commonOp(is: InputStream, filename: String) {\n    val out: OutputStream = file2OutputStream(filename)\n    try {\n      deleteFileIfExists(filename)\n      copy(is, out)\n    } catch {\n      case e: Exception => println(e.printStackTrace())\n    }\n\n    out.close()\n    is.close()\n\n  }\n\n  /**\n   * copies an inputstream to an  outputstream\n   */\n  def copy(in: InputStream, out: OutputStream) {\n    val buffer: Array[Byte] = new Array[Byte](1024)\n    var sum: Int = 0\n    Iterator.continually(in.read(buffer)).takeWhile(_ != -1).foreach({ n => out.write(buffer, 0, n); (sum += buffer.length); println(sum + \" written to output \"); })\n  }\n\n  /**\n   * handling of bzip archive files\n   */\n  def unzipFile(fn: String, outputFileName: String) {\n    val in = new BZip2CompressorInputStream(new FileInputStream(fn))\n    commonOp(in, outputFileName)\n\n  }",
+    "outputs" : [ ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : true,
+      "id" : "EFC5147F765A430E9810E518D813F203"
+    },
+    "cell_type" : "code",
+    "source" : "import java.io.{File, FileWriter, BufferedWriter}\nimport java.util.zip.{ZipEntry, ZipOutputStream}\nvalurl = new URL(\"http://data.gdeltproject.org/events/20170520.export.CSV.zip\");\nBufferedImage bufferedImage = ImageIO.read(url);\nFile file = new File(\"/tmp\");\nImageIO.write(bufferedImage, \"jpg\", file);",
+    "outputs" : [ ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : true,
+      "id" : "D257877A27D8463D8F9DD9A59851A2FD"
+    },
+    "cell_type" : "code",
+    "source" : "import sys.process._\nimport scala.language.postfixOps\nimport java.net.URL\nimport java.io.File\n//new URL(\"http://data.gdeltproject.org/events/20170520.export.CSV\") #> new File(\"20170520.export.CSV.zip\") !!\n\nimport org.apache.commons.io.FileUtils\n\nval localZipFile = new File(\"/tmp/20170520.export.CSV.zip\")\nFileUtils.copyURLToFile(new URL(\"http://data.gdeltproject.org/events/20170520.export.CSV.zip\"), localZipFile)\n//dbutils.fs.mv(\"file:/tmp/20170520.export.CSV.zip\", \"dbfs:/tmp/sample_zip/LoanStats3a.csv.zip\")\n//display(dbutils.fs.ls(\"/tmp/20170520.export.CSV.zip\"))\n\n",
+    "outputs" : [ ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : true,
+      "id" : "752AB38B16B64D048A3042736AC934F2"
+    },
+    "cell_type" : "code",
+    "source" : "import scala.language.postfixOps\nimport sys.process._\nimport java.net.URL\nimport java.io.File\nimport java.io.{FileInputStream, FileOutputStream}\nimport java.util.zip.ZipInputStream\nval sqc = SparkSession.builder().config(\"spark.deploy.defaultCores\",\"1\").getOrCreate()\n\n\nval vTs = sqc.sql(\"SELECT DATE_FORMAT(  date_sub(current_timestamp,(   1)), 'yyyyMMdd')\").head.getString(0)\nprint (s\"\"\"timestamp is ${vTs}\"\"\")\n//var gdeltUrl=\"http://data.gdeltproject.org/gdeltv2/${vTs}.export.CSV.zip\"\nvar gdeltUrl=\"http://data.gdeltproject.org/events/${vTs}.export.CSV.zip\"\nnew URL(gdeltUrl) #> new File(s\"\"\"/tmp/${vTs}.export.CSV.zip\"\"\") !!    \n/*\nhttp://data.gdeltproject.org/gdeltv2/20150218230000.export.CSV.zip\nhttp://data.gdeltproject.org/gdeltv2/20170622-12.24.00.export.CSV.zip\nhttp://data.gdeltproject.org/gdeltv2/20170621122400.export.CSV.zip\nhttp://data.gdeltproject.org/gdeltv2/20170622122400.export.CSV.zip\n \nval fis = new FileInputStream(s\"\"\"/tmp/${vTs}.export.CSV.zip\"\"\")\nval zis = new ZipInputStream(fis)\nStream.continually(zis.getNextEntry).takeWhile(_ != null).foreach{ file =>\n    val fout = new FileOutputStream(file.getName)\n    val buffer = new Array[Byte](1024)\n    Stream.continually(zis.read(buffer)).takeWhile(_ != -1).foreach(fout.write(buffer, 0, _))\n}*/",
+    "outputs" : [ ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : true,
+      "id" : "748AB4FD5EB1403C9B00100708E08285"
+    },
+    "cell_type" : "code",
+    "source" : "vTs",
+    "outputs" : [ ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : true,
+      "id" : "787B6F225696424EB84DF10ACAC91A7A"
+    },
+    "cell_type" : "code",
+    "source" : "\n",
+    "outputs" : [ ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : true,
+      "id" : "8E52489E3F254AAAAB2DE96BD7354BB3"
+    },
+    "cell_type" : "code",
+    "source" : "\nimport org.joda.time.{DateTimeZone}\nimport org.joda.time.format.DateTimeFormat\nval time_col = sqlContext.sql(\"select ts from mr\")\n                     .map(line => new DateTime(line(0).toInt).toDateTime.toString(\"yyyy/MM/dd\"))\nprint($time_col)",
+    "outputs" : [ ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : true,
+      "id" : "99C081C9037B4AE38A659A1915382DE9"
+    },
+    "cell_type" : "code",
+    "source" : "import java.text.SimpleDateFormat \nval today = Calendar.getInstance().getTime()\n\n// create the date/time formatters\nval minuteFormat = new SimpleDateFormat(\"mm\")\nval hourFormat = new SimpleDateFormat(\"hh\")\nval amPmFormat = new SimpleDateFormat(\"a\")\n\nval currentHour = hourFormat.format(today)// enter code here     // 12\nval currentMinute = minuteFormat.format(today)  // 29\nval amOrPm = amPmFormat.format(today)           // PM\n\n",
+    "outputs" : [ ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : true,
+      "id" : "45C0C73175504C58A3764EDBDD7E0907"
+    },
+    "cell_type" : "code",
+    "source" : "import java.text.SimpleDateFormat \nval today = Calendar.getInstance().getTime()\n\nprint(s\"\"\"$today\"\"\")",
+    "outputs" : [ ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : true,
+      "id" : "54473611C44244D68A328D633348CBEB"
+    },
+    "cell_type" : "code",
+    "source" : "//import org.apache.spark.sql.SQLContext\n//import org.apache.spark._\n//val sparkConf = new SparkConf()//.setAppName(\"TestApp\").setMaster(\"spark://master:7077\")\n//val sc = new SparkContext(sparkConf)\n\n//sparkSession.sql(\"SELECT DATE_FORMAT(  current_timestamp, 'yyyyMMddhh24mmss00')\").show()\n\n\n",
+    "outputs" : [ ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : true,
+      "id" : "C42691FCB8AE4F1AAD6CB1CD534A1BC6"
+    },
+    "cell_type" : "code",
+    "source" : "",
+    "outputs" : [ ]
+  } ],
+  "nbformat" : 4
+}
