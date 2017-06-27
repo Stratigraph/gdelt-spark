@@ -2,7 +2,7 @@ version: "3"
 services:
   master:
     volumes: 
-      - /Users/i070855/Downloads/docker-spark:/data
+      - .:/data
     image: singularities/spark
     command: start-spark master
     hostname: master
@@ -14,7 +14,7 @@ services:
       - "50070:50070"
   worker:
     volumes:
-      - /Users/i070855/Downloads/docker-spark:/data
+      - .:/data
     image: singularities/spark
     command: start-spark worker master
     hostname: worker_1
@@ -24,9 +24,7 @@ services:
     links:
       - master
   notebook:
-    volumes:
-      - /Users/i070855/Downloads/docker-spark:/data
-    image: andypetrella/spark-notebook:0.7.0-scala-2.11.8-spark-2.1.1-hadoop-2.7.2-with-hive
+    image: markteehan/spark-gdelt:2
     hostname: notebook
     depends_on:
       - master
@@ -44,8 +42,8 @@ services:
       - worker
   d3:
     volumes:
-      - /Users/i070855/Downloads/docker-spark:/data
-      - /Users/i070855/Downloads/docker-spark/graphs:/revealjs/talks
+      - .:/data
+      - .:/revealjs/talks
     image: gamsd/revealjs
     hostname: d3
     links:
