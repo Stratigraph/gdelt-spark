@@ -20,11 +20,11 @@ services:
     hostname: worker_1
     environment:
       SPARK_WORKER_CORES: 2
-      SPARK_WORKER_MEMORY: 2g
+      SPARK_WORKER_MEMORY: 3g
     links:
       - master
   notebook:
-    image: markteehan/spark-notebook-gdelt:2
+    image: markteehan/spark-notebook-gdelt:7
     hostname: notebook
     depends_on:
       - master
